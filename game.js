@@ -2,7 +2,7 @@ class Game {
 	constructor(players) {
 		this.players = new Array(players.length);
 		players.forEach((element, i) => {
-			this.players[i] = [element, 2];
+			this.players[i] = [element, 0];
 		});
 		console.log(this.players);
 		this.round = 1;
@@ -70,12 +70,14 @@ class Game {
 
 	displayWord(movement) {
 		textAlign(CENTER, CENTER);
-		textSize(150);
+		textSize(120);
 		fill(0, 0, 0);
 		text(this.word.toUpperCase(), 740, 360);
 
-		textSize(40);
-		text("Cliqueu el botó per començar el temps", 740, 600);
+		if (movement == 0) {
+			textSize(40);
+			text("Cliqueu el botó per començar el temps", 740, 600);
+		}
 	}
 
 	pickWord() {
@@ -86,5 +88,20 @@ class Game {
 		this.players.forEach((element) => {
 			element[1] = 0;
 		});
+	}
+
+	showName(position) {
+		textAlign(CENTER, CENTER);
+		textSize(40);
+		fill(0, 0, 0);
+		text(this.word.toUpperCase(), 740, 120);
+
+		textSize(60);
+		text(this.players[position][0].toUpperCase(), 740, 650);
+	}
+
+	addScore(position, score) {
+		this.players[position][1] += score;
+		console.log("hola");
 	}
 }

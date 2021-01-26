@@ -6,7 +6,7 @@ let video;
 
 let input, button, greeting;
 let players = [];
-let nPlayers = 3;
+let nPlayers = 2;
 
 let game;
 
@@ -14,21 +14,31 @@ let scene = 0;
 let round = 1;
 let movement = 0;
 let rPlayer = 0;
+let actualScore = 10;
 
 let startTime;
 let seconds;
-const countdown = 5;
+const countdown = 10;
+
+let soundTime;
 
 preload = () => {
+	soundFormats("mp3", "ogg");
+	soundTime = loadSound("drawing.mp3");
+
 	font = loadFont("Cereal.ttf");
 };
 
 setup = () => {
+	background("#58656D");
 	canvas = createCanvas(1280, 720);
-	textFont(font);
-	frameRate(144);
+
+	//doodleClassifier = ml5.imageClassifier("DoodleNet", modelReady);
 	video = createCapture(VIDEO);
 	video.hide();
+
+	frameRate(60);
+	textFont(font);
 
 	//Inputs
 	input = createInput();
@@ -46,7 +56,6 @@ setup = () => {
 
 	textAlign(CENTER);
 	textSize(50);
-	background("#58656D");
 };
 
 draw = () => {
@@ -57,9 +66,9 @@ draw = () => {
 	} else if (scene == 1) {
 		scoreboard();
 		if (movement == 0) {
-			game.displayWord();
+			game.displayWord(movement);
 		} else if (movement == 1) {
-			game.displayWord();
+			game.displayWord(movement);
 			seconds = startTime - millis() / 1000;
 			textAlign(RIGHT, CENTER);
 			textSize(50);
@@ -69,12 +78,19 @@ draw = () => {
 				movement = 2;
 			}
 		} else if (movement == 2) {
+			soundTime.pause();
 			textAlign(RIGHT, CENTER);
 			textSize(50);
 			fill(0, 0, 0);
 			text("REVISIÓ", 1240, 40);
 
-			image(video, 450, 200, width, height);
+			//image(video, 450, 200, 300, 300);
+			//filter(THRESHOLD, 0.7);
+			game.showName(rPlayer);
+			textAlign(RIGHT, CENTER);
+			textSize(40);
+			fill(0, 0, 0);
+			text("CERTESA: " + actualScore + " %", 1240, 120);
 		}
 	} else if (scene == 2) {
 		finalScoreboard();
@@ -145,18 +161,26 @@ keyPressed = () => {
 	if (scene == 1) {
 		if (keyCode === LEFT_ARROW) {
 			if (movement == 0) {
-				console.log("start time");
+				soundTime.play();
 				startTime = millis() / 1000 + countdown;
 				movement = 1;
 			} else if (movement == 1) {
-				console.log("time stop");
 				movement = 2;
 			} else if (movement == 2) {
-				console.log("check draws");
-				game.pickWord();
-				if (game.round == 5) scene = 2;
-				game.round++;
-				movement = 0;
+				if (rPlayer <= game.players.length - 2) {
+					game.addScore(rPlayer, actualScore);
+					rPlayer++;
+				} else {
+					game.addScore(rPlayer, actualScore);
+					game.pickWord();
+					if (game.round == 10) {
+						scene = 2;
+					} else {
+						game.round++;
+						rPlayer = 0;
+						movement = 0;
+					}
+				}
 			}
 		}
 	} else if (scene == 2) {
@@ -168,3 +192,19 @@ keyPressed = () => {
 		}
 	}
 };
+
+//Model
+
+/*const modelReady = () => {
+	console.log("model loaded");
+	doodleClassifier.classify(image, gotResults);
+};
+
+const gotResults = (error, results) => {
+	if (error) {
+		console.error(error);
+		return;
+	}
+	//console.log(results);
+	doodleClassifier.classify(image, gotResults);
+};*/
