@@ -102,6 +102,5 @@ class Game {
 
 	addScore(position, score) {
 		this.players[position][1] += score;
-		console.log("hola");
 	}
 }

@@ -14,7 +14,7 @@ let scene = 0;
 let round = 1;
 let movement = 0;
 let rPlayer = 0;
-let actualScore = 10;
+let actualScore = 0;
 
 let startTime;
 let seconds;
@@ -33,7 +33,6 @@ setup = () => {
 	background("#58656D");
 	canvas = createCanvas(1280, 720);
 
-	//doodleClassifier = ml5.imageClassifier("DoodleNet", modelReady);
 	video = createCapture(VIDEO);
 	video.hide();
 
@@ -84,8 +83,10 @@ draw = () => {
 			fill(0, 0, 0);
 			text("REVISIÓ", 1240, 40);
 
-			//image(video, 450, 200, 300, 300);
-			//filter(THRESHOLD, 0.7);
+			video.size(500, 375);
+			image(video, 480, 200, 500, 375);
+			doodleClassifier = ml5.imageClassifier("DoodleNet", modelReady);
+
 			game.showName(rPlayer);
 			textAlign(RIGHT, CENTER);
 			textSize(40);
@@ -169,6 +170,7 @@ keyPressed = () => {
 			} else if (movement == 2) {
 				if (rPlayer <= game.players.length - 2) {
 					game.addScore(rPlayer, actualScore);
+					actualScore = 0;
 					rPlayer++;
 				} else {
 					game.addScore(rPlayer, actualScore);
@@ -195,9 +197,8 @@ keyPressed = () => {
 
 //Model
 
-/*const modelReady = () => {
-	console.log("model loaded");
-	doodleClassifier.classify(image, gotResults);
+const modelReady = () => {
+	doodleClassifier.classify(video, gotResults);
 };
 
 const gotResults = (error, results) => {
@@ -205,6 +206,11 @@ const gotResults = (error, results) => {
 		console.error(error);
 		return;
 	}
-	//console.log(results);
-	doodleClassifier.classify(image, gotResults);
-};*/
+
+	results.forEach((element) => {
+		if (game.word == element.label) {
+			let score = Math.round(1000 * element.confidence, 2);
+			if (actualScore <= score) actualScore = score;
+		}
+	});
+};
